@@ -160,6 +160,8 @@ func streamRelay(suuid string, connectionURL string) {
 	// Add a new client UUID for the stream. Return the client UUID and the data channel
 	cuuid, ch := Config.addClient(suuid)
 
+	fullUrl := connectionURL + "/" + suuid
+
 	// Remove the client when this method goes out of scope
 	defer Config.deleteClient(suuid, cuuid)
 
@@ -188,13 +190,13 @@ func streamRelay(suuid string, connectionURL string) {
 	log.Println(fmt.Sprintf("[%s] Sending meta (%s) and init (%d bytes) to client", connectionURL, meta, len(init)))
 
 	// Send header
-	err = postData(connectionURL, append([]byte{9}, meta...))
+	err = postData(fullUrl, append([]byte{9}, meta...))
 	if err != nil {
 		return
 	}
 
 	// Send init
-	err = postData(connectionURL, init)
+	err = postData(fullUrl, init)
 	if err != nil {
 		return
 	}
@@ -236,9 +238,9 @@ func streamRelay(suuid string, connectionURL string) {
 			// Transform the packet to fMP4
 			ready, buf, _ := muxer.WritePacket(pck, false)
 			if ready {
-				log.Println(fmt.Sprintf("[%s] Sending data buffer (%d bytes)", connectionURL, len(buf)))
+				log.Println(fmt.Sprintf("[%s] Sending data buffer (%d bytes)", fullUrl, len(buf)))
 
-				err = postData(connectionURL, buf)
+				err = postData(fullUrl, buf)
 				if err != nil {
 					return
 				}
