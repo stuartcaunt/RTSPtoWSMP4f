@@ -3,9 +3,11 @@
     "http_port": ":8083"
   },
   "streams": {
-    "H264_AAC": {
-      "on_demand": false,
-      "url": "rtsp://171.25.232.236/12d525bc9f014e209c1280bc0d46a87e"
+    "Stream1": {
+      "url": "rtsp://localhost:8554/live.stream"
+    },
+    "Stream2": {
+      "url": "rtsp://localhost:8554/live.stream"
     }
   }
 }

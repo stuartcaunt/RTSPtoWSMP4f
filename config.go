@@ -31,7 +31,6 @@ type ServerST struct {
 type StreamST struct {
 	URL      string `json:"url"`
 	Status   bool   `json:"status"`
-	OnDemand bool   `json:"on_demand"`
 	RunLock  bool   `json:"-"`
 	Codecs   []av.CodecData
 	Cl       map[string]viewer
@@ -45,10 +44,10 @@ func (element *ConfigST) RunIFNotRun(uuid string) {
 	element.mutex.Lock()
 	defer element.mutex.Unlock()
 	if tmp, ok := element.Streams[uuid]; ok {
-		if tmp.OnDemand && !tmp.RunLock {
+		if !tmp.RunLock {
 			tmp.RunLock = true
 			element.Streams[uuid] = tmp
-			go RTSPWorkerLoop(uuid, tmp.URL, tmp.OnDemand)
+			go RTSPWorkerLoop(uuid, tmp.URL)
 		}
 	}
 }
@@ -57,7 +56,7 @@ func (element *ConfigST) RunUnlock(uuid string) {
 	element.mutex.Lock()
 	defer element.mutex.Unlock()
 	if tmp, ok := element.Streams[uuid]; ok {
-		if tmp.OnDemand && tmp.RunLock {
+		if tmp.RunLock {
 			tmp.RunLock = false
 			element.Streams[uuid] = tmp
 		}
@@ -100,7 +99,7 @@ func (element *ConfigST) cast(uuid string, pck av.Packet) {
 	}
 }
 
-func (element *ConfigST) ext(suuid string) bool {
+func (element *ConfigST) streamExists(suuid string) bool {
 	element.mutex.Lock()
 	defer element.mutex.Unlock()
 	_, ok := element.Streams[suuid]
@@ -131,7 +130,7 @@ func (element *ConfigST) coGe(suuid string) []av.CodecData {
 	return nil
 }
 
-func (element *ConfigST) clAd(suuid string) (string, chan av.Packet) {
+func (element *ConfigST) addClient(suuid string) (string, chan av.Packet) {
 	element.mutex.Lock()
 	defer element.mutex.Unlock()
 	cuuid := pseudoUUID()
@@ -140,20 +139,16 @@ func (element *ConfigST) clAd(suuid string) (string, chan av.Packet) {
 	return cuuid, ch
 }
 
-func (element *ConfigST) list() (string, []string) {
+func (element *ConfigST) getStreamNames() ([]string) {
 	element.mutex.Lock()
 	defer element.mutex.Unlock()
 	var res []string
-	var fist string
-	for k := range element.Streams {
-		if fist == "" {
-			fist = k
-		}
-		res = append(res, k)
+	for streamName := range element.Streams {
+		res = append(res, streamName)
 	}
-	return fist, res
+	return res
 }
-func (element *ConfigST) clDe(suuid, cuuid string) {
+func (element *ConfigST) deleteClient(suuid, cuuid string) {
 	element.mutex.Lock()
 	defer element.mutex.Unlock()
 	delete(element.Streams[suuid].Cl, cuuid)

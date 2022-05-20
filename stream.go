@@ -14,23 +14,15 @@ var (
 	ErrorStreamExitNoViewer        = errors.New("Stream Exit On Demand No Viewer")
 )
 
-func serveStreams() {
-	for k, v := range Config.Streams {
-		if !v.OnDemand {
-			go RTSPWorkerLoop(k, v.URL, v.OnDemand)
-		}
-	}
-}
-
-func RTSPWorkerLoop(name, url string, OnDemand bool) {
+func RTSPWorkerLoop(name, url string) {
 	defer Config.RunUnlock(name)
 	for {
 		log.Println(name, "Stream Try Connect")
-		err := RTSPWorker(name, url, OnDemand)
+		err := RTSPWorker(name, url)
 		if err != nil {
 			log.Println(err)
 		}
-		if OnDemand && !Config.HasViewer(name) {
+		if !Config.HasViewer(name) {
 			log.Println(name, ErrorStreamExitNoViewer)
 			return
 		}
@@ -38,7 +30,7 @@ func RTSPWorkerLoop(name, url string, OnDemand bool) {
 	}
 }
 
-func RTSPWorker(name, url string, OnDemand bool) error {
+func RTSPWorker(name, url string) error {
 	keyTest := time.NewTimer(20 * time.Second)
 	clientTest := time.NewTimer(20 * time.Second)
 	RTSPClient, err := rtspv2.Dial(rtspv2.RTSPClientOptions{URL: url, DisableAudio: true, DialTimeout: 3 * time.Second, ReadWriteTimeout: 3 * time.Second, Debug: false})
@@ -58,7 +50,7 @@ func RTSPWorker(name, url string, OnDemand bool) error {
 	for {
 		select {
 		case <-clientTest.C:
-			if OnDemand && !Config.HasViewer(name) {
+			if !Config.HasViewer(name) {
 				return ErrorStreamExitNoViewer
 			}
 		case <-keyTest.C:
