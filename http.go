@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"log"
 	"net/http"
@@ -29,7 +30,6 @@ func serveHTTP() {
 
 	router := gin.Default()
 	gin.SetMode(gin.DebugMode)
-	router.LoadHTMLGlob("web/templates/*")
 
 	router.GET("api/streams", func(c *gin.Context) {
 		streams := Config.getStreamNames()
@@ -187,18 +187,17 @@ func streamRelay(suuid string, connectionURL string) {
 	meta, init := muxer.GetInit(codecs)
 	log.Println(fmt.Sprintf("[%s] Sending meta (%s) and init (%d bytes) to client", connectionURL, meta, len(init)))
 
-	// TODO Send header
-	// err = websocket.Message.Send(ws, append([]byte{9}, meta...))
-	// if err != nil {
-	// 	log.Println("websocket.Message.Send", err)
-	// 	return
-	// }
+	// Send header
+	err = postData(connectionURL, append([]byte{9}, meta...))
+	if err != nil {
+		return
+	}
 
-	// TODO Send init
-	// err = websocket.Message.Send(ws, init)
-	// if err != nil {
-	// 	return
-	// }
+	// Send init
+	err = postData(connectionURL, init)
+	if err != nil {
+		return
+	}
 
 	var start bool
 
@@ -239,13 +238,20 @@ func streamRelay(suuid string, connectionURL string) {
 			if ready {
 				log.Println(fmt.Sprintf("[%s] Sending data buffer (%d bytes)", connectionURL, len(buf)))
 
-				// TODO POST the buffer over HTTP
-				// err := websocket.Message.Send(ws, buf)
-				// if err != nil {
-				// 	return
-				// }
+				err = postData(connectionURL, buf)
+				if err != nil {
+					return
+				}
 			}
 		}
 	}
 }
 
+func postData(url string, data []byte) error {
+	_, err := http.Post(url, "application/octet-stream", bytes.NewReader(data))
+	if err != nil {
+		log.Println(fmt.Sprintf("[%s] Failed to send data", url))
+		return err
+	}
+	return nil
+}
