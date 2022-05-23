@@ -7,7 +7,7 @@
       "url": "rtsp://localhost:8554/live.stream"
     },
     "Stream2": {
-      "url": "rtsp://localhost:8554/live.stream"
+      "url": "rtsp://localhost:8554/live2.stream"
     }
   }
 }

@@ -1,32 +1,31 @@
-# RTSPtoWSMP4f
+# RTSP to fMP4 over HTTP
 
-RTSP Stream to WebBrowser MSE over WebSocket based MP4f segments
+> This project has been forked from https://github.com/deepch/RTSPtoWSMP4f 
 
-full native! not use ffmpeg or gstreamer
+This project converts the original code from deepch to provide a webservice for streaming fMP4 over HTTP rather than integrating the streams into a client via websockets.
 
-if you need RTSPtoWebRTC use https://github.com/deepch/RTSPtoWebRTC
+The API allows a client to 
+ - List available streams
+ - Connect to a stream
+ - Disconnect from a stream
 
-![RTSPtoWSMP4f image](doc/demo4.png)
+When a client requests a stream connection, it passes a callback URL to which the server POSTs fMP4 data. The first connection to a stream launches the RTSP decoder and when no clients are connected the decoder stops. Each client has a MUXer to handle the repackaging of the video stream to fMP4.
 
-
-### Download Source
+ ## Building and running
 
 1. Download source
    ```bash 
-   $ git clone https://github.com/deepch/RTSPtoWSMP4f  
+   git clone https://github.com/stuartcaunt/RTSPtoWSMP4f  
    ```
-3. CD to Directory
+2. CD to Directory
+
    ```bash
-    $ cd RTSPtoWSMP4f/
+    cd RTSPtoWSMP4f/
    ```
-4. Test Run
+3. Run the server
    ```bash
-    $ GO111MODULE=on go run *.go
+    GO111MODULE=on go run *.go
    ```
-5. Open Browser
-    ```bash
-    open web browser http://127.0.0.1:8083 work chrome, safari, firefox
-    ```
 
 ## Configuration
 
@@ -47,6 +46,52 @@ format:
 }
 ```
 
+## Testing
+
+### CURL requests examples
+
+The following assume the server is running on localhost on port 8083.
+
+1. Getting a list of streams
+> Endpoint: `GET /api/streams`
+```bash
+curl -X GET  http://localhost:8083/api/streams
+```
+
+2. Connecting to a stream
+> Endpoint: `POST /api/streams/{streamId}/connect`
+```bash
+curl -X POST  http://localhost:8083/api/streams/Stream1/connect - d '{"url": "http://localhost:4000/api/streams"}'
+```
+
+> Note: The server will POST video stream data to `http://localhost:8000/api/streams/Stream1`
+
+3. Disconnecting from a stream
+> Endpoint: `POST /api/streams/{streamId}/disconnect`
+```bash
+curl -X POST  http://localhost:8083/api/streams/Stream1/disconnect - d '{"url": "http://localhost:4000/api/streams"}'
+```
+
+### Demo client
+
+The project offers a simple node test client to test the reception of POSTed data
+
+1. CD to Directory
+
+   ```bash
+    cd demo-client
+   ```
+2. Install dependencies
+   ```bash
+    npm install
+   ```
+3. Run the client application
+   ```bash
+    npm start
+   ```
+
+By default the client runs on port 4000.
+
 ## Limitations
 
 Video Codecs Supported: H264 all profiles, H265 work only safari and (IE hw video card)
@@ -56,22 +101,3 @@ Audio Codecs Supported: AAC
 ## Test
 
 CPU usage 0.2% one core cpu intel core i7 / stream
-
-## Team
-
-Deepch - https://github.com/deepch streaming developer
-
-Dmitry - https://github.com/vdalex25 web developer
-
-## Other Example
-
-Examples of working with video on golang
-
-- [RTSPtoWeb](https://github.com/deepch/RTSPtoWeb)
-- [RTSPtoWebRTC](https://github.com/deepch/RTSPtoWebRTC)
-- [RTSPtoWSMP4f](https://github.com/deepch/RTSPtoWSMP4f)
-- [RTSPtoImage](https://github.com/deepch/RTSPtoImage)
-- [RTSPtoHLS](https://github.com/deepch/RTSPtoHLS)
-- [RTSPtoHLSLL](https://github.com/deepch/RTSPtoHLSLL)
-
-[![paypal.me/AndreySemochkin](https://ionicabizau.github.io/badges/paypal.svg)](https://www.paypal.me/AndreySemochkin) - You can make one-time donations via PayPal. I'll probably buy a ~~coffee~~ tea. :tea:
