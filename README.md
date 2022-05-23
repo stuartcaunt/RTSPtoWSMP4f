@@ -61,7 +61,7 @@ curl -X GET  http://localhost:8083/api/streams
 2. Connecting to a stream
 > Endpoint: `POST /api/streams/{streamId}/connect`
 ```bash
-curl -X POST  http://localhost:8083/api/streams/Stream1/connect - d '{"url": "http://localhost:4000/api/streams"}'
+curl -X POST  http://localhost:8083/api/streams/Stream1/connect -d '{"url": "http://localhost:4000/api/streams"}'
 ```
 
 > Note: The server will POST video stream data to `http://localhost:8000/api/streams/Stream1`
@@ -69,7 +69,7 @@ curl -X POST  http://localhost:8083/api/streams/Stream1/connect - d '{"url": "ht
 3. Disconnecting from a stream
 > Endpoint: `POST /api/streams/{streamId}/disconnect`
 ```bash
-curl -X POST  http://localhost:8083/api/streams/Stream1/disconnect - d '{"url": "http://localhost:4000/api/streams"}'
+curl -X POST  http://localhost:8083/api/streams/Stream1/disconnect -d '{"url": "http://localhost:4000/api/streams"}'
 ```
 
 ### Demo client
