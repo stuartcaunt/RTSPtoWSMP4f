@@ -24,7 +24,9 @@ export class Application {
         const streamId = req.params.streamId;
         const data = req.body;
 
-        console.log(`Got ${data.length} bytes sent from stream ${streamId}`);
+        logger.info(`Got ${data.length} bytes sent from stream ${streamId}`);
+        logger.debug(data.toString('hex', 0, Math.min(data.length, 40)));
+
         res.sendStatus(200);
       });
 

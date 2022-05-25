@@ -25,7 +25,7 @@ export function APPLICATION_CONFIG(): ApplicationConfig {
         host: process.env.VISA_SECURITY_GROUPS_SERVER_HOST == null ? 'localhost' : process.env.VISA_SECURITY_GROUPS_SERVER_HOST,
       },
       logging: {
-        level: process.env.VISA_SECURITY_GROUPS_LOG_LEVEL == null ? 'info' : process.env.VISA_SECURITY_GROUPS_LOG_LEVEL,
+        level: process.env.VISA_SECURITY_GROUPS_LOG_LEVEL == null ? 'debug' : process.env.VISA_SECURITY_GROUPS_LOG_LEVEL,
         timezone: process.env.VISA_SECURITY_GROUPS_LOG_TIMEZONE,
       }
     };
